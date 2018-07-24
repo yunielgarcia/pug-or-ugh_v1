@@ -29,7 +29,7 @@ class UserPref(models.Model):
 class UserDog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     dog = models.ForeignKey(Dog, on_delete=models.CASCADE)
-    status = models.CharField(max_length=1)
+    status = models.CharField(max_length=1, default='u')
 
     def __str__(self):  # __unicode__ on Python 2
         return '{0} and {1}'.format(self.user.username, self.dog.name)

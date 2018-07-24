@@ -17,11 +17,6 @@ from django.conf.urls import url, include
 from django.contrib import admin
 
 from rest_framework import authtoken
-from rest_framework import routers
-from pugorugh import views
-
-router = routers.SimpleRouter()
-router.register(r'dogs', views.DogViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -29,5 +24,4 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls',
                                namespace='rest_framework')),
     url(r'^api-token-auth/', authtoken.views.obtain_auth_token),
-    url(r'^api/v2/', include(router.urls, namespace='apiv2'))
 ]
