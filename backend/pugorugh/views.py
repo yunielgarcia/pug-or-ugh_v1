@@ -54,15 +54,25 @@ class RetrieveDog(generics.RetrieveAPIView):
             return self.get_queryset().first()
 
 
-class PreferenceViewSet(viewsets.ModelViewSet):
+class PreferenceRetrieveUpdate(generics.RetrieveUpdateAPIView):
     serializer_class = serializers.UserPrefSerializer
 
-    def get_queryset(self):
-        return models.UserPref.objects.filter(user=self.request.user)
+    def retrieve(self, request, *args, **kwargs):
+        preference = models.UserPref.objects.get(user=self.request.user)
+        serializer = serializers.UserPrefSerializer(
+            preference, many=False
+        )
+        return Response(serializer.data)
 
-    def list(self, request, *args, **kwargs):
-        # call the original 'list'
-        response = super(PreferenceViewSet, self).list(request, *args, **kwargs)
-        # customize the response data
-        response.data = response.data[0]
-        return response  # return response with this custom representation
+# class PreferenceViewSet(viewsets.ModelViewSet):
+#     serializer_class = serializers.UserPrefSerializer
+#
+#     def get_queryset(self):
+#         return models.UserPref.objects.filter(user=self.request.user)
+#
+#     def list(self, request, *args, **kwargs):
+#         # call the original 'list'
+#         response = super(PreferenceViewSet, self).list(request, *args, **kwargs)
+#         # customize the response data
+#         response.data = response.data[0]
+#         return response  # return response with this custom representation

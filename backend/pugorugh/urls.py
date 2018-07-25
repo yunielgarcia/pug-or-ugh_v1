@@ -25,5 +25,7 @@ urlpatterns = ([
         views.RetrieveDog.as_view(),
         name='next'),
 
+    url(r'^api/user/preferences/$', views.PreferenceRetrieveUpdate.as_view(), name='preferences-user'),
+
     url(r'^$', TemplateView.as_view(template_name='index.html'))
 ])

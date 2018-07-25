@@ -18,9 +18,9 @@ class Dog(models.Model):
 # Profile model
 class UserPref(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    age = models.CharField(max_length=255)
-    gender = models.CharField(max_length=255)
-    size = models.CharField(max_length=255)
+    age = models.CharField(max_length=255, null=True)
+    gender = models.CharField(max_length=255, null=True)
+    size = models.CharField(max_length=255, null=True)
 
     def __str__(self):  # __unicode__ on Python 2
         return self.user.username
