@@ -9,7 +9,7 @@ class Dog(models.Model):
     age = models.IntegerField()
     gender = models.CharField(max_length=1)
     size = models.CharField(max_length=2)
-    users = models.ManyToManyField(User, through='UserDog')
+    users = models.ManyToManyField(User, through='UserDog', null=True)
 
     def __str__(self):  # __unicode__ on Python 2
         return self.name
@@ -27,8 +27,8 @@ class UserPref(models.Model):
 
 
 class UserDog(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    dog = models.ForeignKey(Dog, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='relation')
+    dog = models.ForeignKey(Dog, on_delete=models.CASCADE, related_name='relation')
     status = models.CharField(max_length=1, default='u')
 
     def __str__(self):  # __unicode__ on Python 2

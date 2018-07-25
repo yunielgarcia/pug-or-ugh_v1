@@ -29,3 +29,9 @@ class UserPrefSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserPref
         fields = "__all__"
+
+
+# class UserDogSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = models.UserDog
+#         fields = "__all__"

@@ -22,36 +22,31 @@ class RetrieveDog(generics.RetrieveAPIView):
         """Getting all the dogs that match the user's preference"""
         user = self.request.user
         req_opinion = self.kwargs['opinion']
+        matching_dogs = models.Dog.objects.all()
 
         if req_opinion == 'undecided':
-            queryset = preferred_dogs.filter(
-                userdog__status='u',
-                userdog__user_id=user.id
-            ).order_by('pk')
-        elif req_opinion == 'liked':
-            queryset = preferred_dogs.filter(
-                userdog__status='l',
-                userdog__user_id=user.id
+            matching_dogs = models.Dog.objects.exclude(
+                users=user
             ).order_by('pk')
         elif req_opinion == 'disliked':
-            queryset = preferred_dogs.filter(
-                userdog__status='d',
-                userdog__user_id=user.id
+            matching_dogs = models.Dog.objects.filter(
+                relation__status='d',
+                relation__user=user.id
+            ).order_by('pk')
+        elif req_opinion == 'liked':
+            matching_dogs = models.Dog.objects.filter(
+                relation__status='l',
+                relation__user=user.id
             ).order_by('pk')
 
-        user_pref = models.UserPref.objects.get(user=user)
-        # mathing_dogs = models.Dog.objects.filter(
-        #     gender__in=user_pref.gender.split(","),
-        #     size__in=user_pref.size.split(","),
-        #     # missing the age here
-        # )
-        mathing_dogs = models.Dog.objects.all()
-        return mathing_dogs
+        return matching_dogs
 
     def get_object(self):
         """Getting dog from query_set ordered by pk"""
         pk = self.kwargs['pk']
-        # GET first instance of Dog with a PK value > the URL
 
         current_dog = self.get_queryset().filter(id__gt=pk).first()
-        return current_dog
+        if current_dog:
+            return current_dog
+        else:
+            return self.get_queryset().first()
