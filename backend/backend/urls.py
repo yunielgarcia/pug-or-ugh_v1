@@ -15,8 +15,13 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from pugorugh import views
 
+from rest_framework import routers
 from rest_framework import authtoken
+
+router = routers.SimpleRouter()
+router.register(r'preferences', views.PreferenceViewSet, base_name='preferences')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -24,4 +29,5 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls',
                                namespace='rest_framework')),
     url(r'^api-token-auth/', authtoken.views.obtain_auth_token),
+    url(r'^api/user/', include(router.urls, namespace='user_preferences'))
 ]

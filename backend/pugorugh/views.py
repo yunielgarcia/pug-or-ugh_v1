@@ -2,8 +2,10 @@ from django.contrib.auth import get_user_model
 
 from rest_framework import permissions
 from rest_framework import generics
+from rest_framework import viewsets
+from rest_framework.response import Response
+
 from rest_framework.generics import CreateAPIView
-from django.http import Http404
 
 from . import serializers
 from . import models
@@ -50,3 +52,17 @@ class RetrieveDog(generics.RetrieveAPIView):
             return current_dog
         else:
             return self.get_queryset().first()
+
+
+class PreferenceViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.UserPrefSerializer
+
+    def get_queryset(self):
+        return models.UserPref.objects.filter(user=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        # call the original 'list'
+        response = super(PreferenceViewSet, self).list(request, *args, **kwargs)
+        # customize the response data
+        response.data = response.data[0]
+        return response  # return response with this custom representation
