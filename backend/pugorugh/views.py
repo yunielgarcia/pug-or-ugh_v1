@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from rest_framework import permissions
 from rest_framework import generics
 from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
+
 from rest_framework.response import Response
 
 from rest_framework.generics import CreateAPIView
@@ -56,6 +58,7 @@ class RetrieveDog(generics.RetrieveAPIView):
 
 class PreferenceRetrieveUpdate(generics.RetrieveUpdateAPIView):
     serializer_class = serializers.UserPrefSerializer
+    queryset = models.UserPref.objects.all()
 
     def retrieve(self, request, *args, **kwargs):
         preference = models.UserPref.objects.get(user=self.request.user)
@@ -63,6 +66,14 @@ class PreferenceRetrieveUpdate(generics.RetrieveUpdateAPIView):
             preference, many=False
         )
         return Response(serializer.data)
+
+    def get_object(self):
+        # todo: parece hay q integrar el user en el put
+        return get_object_or_404(
+            self.get_queryset(),
+            user=self.request.user
+        )
+
 
 # class PreferenceViewSet(viewsets.ModelViewSet):
 #     serializer_class = serializers.UserPrefSerializer
