@@ -68,22 +68,7 @@ class PreferenceRetrieveUpdate(generics.RetrieveUpdateAPIView):
         return Response(serializer.data)
 
     def get_object(self):
-        # todo: parece hay q integrar el user en el put
         return get_object_or_404(
             self.get_queryset(),
             user=self.request.user
         )
-
-
-# class PreferenceViewSet(viewsets.ModelViewSet):
-#     serializer_class = serializers.UserPrefSerializer
-#
-#     def get_queryset(self):
-#         return models.UserPref.objects.filter(user=self.request.user)
-#
-#     def list(self, request, *args, **kwargs):
-#         # call the original 'list'
-#         response = super(PreferenceViewSet, self).list(request, *args, **kwargs)
-#         # customize the response data
-#         response.data = response.data[0]
-#         return response  # return response with this custom representation
