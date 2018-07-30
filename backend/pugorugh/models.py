@@ -17,8 +17,8 @@ class Dog(models.Model):
 
 # Profile model
 class UserPref(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    age = models.CharField(max_length=255, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_pref')
+    age = models.CharField(default='b', max_length=255)
     gender = models.CharField(max_length=255, null=True)
     size = models.CharField(max_length=255, null=True)
 
@@ -27,8 +27,8 @@ class UserPref(models.Model):
 
 
 class UserDog(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='relation')
-    dog = models.ForeignKey(Dog, on_delete=models.CASCADE, related_name='relation')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    dog = models.ForeignKey(Dog, on_delete=models.CASCADE)
     status = models.CharField(max_length=1, default='u')
 
     def __str__(self):  # __unicode__ on Python 2

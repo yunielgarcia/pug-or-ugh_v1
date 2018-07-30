@@ -1,11 +1,8 @@
 from django.contrib.auth import get_user_model
-
 from rest_framework import permissions
 from rest_framework import generics
-from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
-
-from rest_framework.response import Response
+from django.db.models import Q, Case, When
 
 from rest_framework.generics import CreateAPIView
 
@@ -28,8 +25,22 @@ class RetrieveDog(generics.RetrieveAPIView):
         req_opinion = self.kwargs['opinion']
         matching_dogs = models.Dog.objects.all()
 
+        size_pref = user.user_pref.size.split(',')
+        gender_pref = user.user_pref.gender.split(',')
+        letters_for_age_ranges = user.user_pref.age.split(',')
+        age_pref = self.month_ranges(letters_for_age_ranges)
+
         if req_opinion == 'undecided':
-            matching_dogs = models.Dog.objects.exclude(
+            matching_dogs = models.Dog.objects.filter(
+                age__gte=Case(
+                    # todo:
+                    When(
+                        users,
+                        then=0)
+                ),
+                gender__in=gender_pref,
+                size__in=size_pref,
+            ).exclude(
                 users=user
             ).order_by('pk')
         elif req_opinion == 'disliked':
@@ -55,17 +66,15 @@ class RetrieveDog(generics.RetrieveAPIView):
         else:
             return self.get_queryset().first()
 
+    @staticmethod
+    def month_ranges(letters_for_age_ranges):
+        print(letters_for_age_ranges)
+        return letters_for_age_ranges
+
 
 class PreferenceRetrieveUpdate(generics.RetrieveUpdateAPIView):
     serializer_class = serializers.UserPrefSerializer
     queryset = models.UserPref.objects.all()
-
-    def retrieve(self, request, *args, **kwargs):
-        preference = models.UserPref.objects.get(user=self.request.user)
-        serializer = serializers.UserPrefSerializer(
-            preference, many=False
-        )
-        return Response(serializer.data)
 
     def get_object(self):
         return get_object_or_404(
