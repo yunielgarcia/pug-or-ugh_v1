@@ -32,12 +32,6 @@ class RetrieveDog(generics.RetrieveAPIView):
 
         if req_opinion == 'undecided':
             matching_dogs = models.Dog.objects.filter(
-                age__gte=Case(
-                    # todo:
-                    When(
-                        users,
-                        then=0)
-                ),
                 gender__in=gender_pref,
                 size__in=size_pref,
             ).exclude(
