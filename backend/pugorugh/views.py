@@ -34,6 +34,10 @@ class RetrieveDog(generics.RetrieveAPIView):
             matching_dogs = models.Dog.objects.filter(
                 gender__in=gender_pref,
                 size__in=size_pref,
+                age__in=Case(
+                    When(users__user_pref__age='b', then=[10, 11, 12, 13, 14, 15]),
+                    When(users__user_pref__age='y', then=[10, 11, 12, 13, 14, 15]),
+                ),
             ).exclude(
                 users=user
             ).order_by('pk')
