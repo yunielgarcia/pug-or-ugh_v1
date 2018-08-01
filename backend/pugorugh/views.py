@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import permissions
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
-from django.db.models import Q, Case, When
+from django.db.models import Q
 
 from rest_framework.generics import CreateAPIView
 
@@ -24,20 +24,21 @@ class RetrieveDog(generics.RetrieveAPIView):
         user = self.request.user
         req_opinion = self.kwargs['opinion']
         matching_dogs = models.Dog.objects.all()
+        span = models.TIME_SPAN
 
         size_pref = user.user_pref.size.split(',')
         gender_pref = user.user_pref.gender.split(',')
-        letters_for_age_ranges = user.user_pref.age.split(',')
-        age_pref = self.month_ranges(letters_for_age_ranges)
+        # letters_for_age_ranges = user.user_pref.age.split(',')
+        age_pref = user.user_pref.age.split(',')
 
         if req_opinion == 'undecided':
             matching_dogs = models.Dog.objects.filter(
+                Q(age__in=list(range(1, span)) if 'b' in age_pref else [0]) |
+                Q(age__in=list(range(span, span + 1)) if 'y' in age_pref else [0]) |
+                Q(age__in=list(range(span * 2, span * 3 + 1)) if 'a' in age_pref else [0]) |
+                Q(age__gte=90 if 's' in age_pref else 9999),  # 9999 impossible age for a dog
                 gender__in=gender_pref,
                 size__in=size_pref,
-                age__in=Case(
-                    When(users__user_pref__age='b', then=[10, 11, 12, 13, 14, 15]),
-                    When(users__user_pref__age='y', then=[10, 11, 12, 13, 14, 15]),
-                ),
             ).exclude(
                 users=user
             ).order_by('pk')

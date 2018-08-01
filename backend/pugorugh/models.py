@@ -33,3 +33,8 @@ class UserDog(models.Model):
 
     def __str__(self):  # __unicode__ on Python 2
         return '{0} and {1}'.format(self.user.username, self.dog.name)
+
+
+# Taking an average of 10 years of lifetime
+# Taking for categories of age 'baby', 'young', 'adult', 'senior'
+TIME_SPAN = int((10 * 12) / 4)

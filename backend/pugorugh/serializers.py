@@ -32,21 +32,3 @@ class UserPrefSerializer(serializers.ModelSerializer):
         model = models.UserPref
         fields = ('age', 'gender', 'size')
 
-    # def get_age(self, obj):
-    #     """Considering 10 years as average life time for dogs"""
-    #     # total year in months / 4 to determine range of months
-    #     # for each age ( "b" for baby, "y" for young, "a" for adult, "s" for senior)
-    #     year_avg = 10
-    #     num_clasif = 4
-    #     period_changing_span = (year_avg * 12) / num_clasif
-    #     span = int(period_changing_span)
-    #     pref_age = obj.age
-    #     if pref_age in range(0, span + 1):
-    #         return 'b'
-    #     elif pref_age in range(span, (span * 2) + 1):
-    #         return 'y'
-    #     elif pref_age in range((span * 2), (span * 3) + 1):
-    #         return 'a'
-    #     else:
-    #         return 's'
-
