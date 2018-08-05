@@ -6,6 +6,8 @@ from django.db.models import Q
 
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
+from rest_framework import mixins
+from rest_framework import viewsets
 
 from . import serializers
 from . import models
@@ -29,7 +31,6 @@ class RetrieveDog(generics.RetrieveAPIView):
 
         size_pref = user.user_pref.size.split(',')
         gender_pref = user.user_pref.gender.split(',')
-        # letters_for_age_ranges = user.user_pref.age.split(',')
         age_pref = user.user_pref.age.split(',')
 
         if req_opinion == 'undecided':
@@ -41,8 +42,10 @@ class RetrieveDog(generics.RetrieveAPIView):
                 gender__in=gender_pref,
                 size__in=size_pref,
             ).exclude(
+                # making sure they have no user or the relations is diff than 'u' undecided
                 Q(users=user) |
-                Q(relation__status='u', relation__user=user.id)
+                Q(relation__status='l', relation__user=user.id) |
+                Q(relation__status='d', relation__user=user.id)
             ).order_by('pk')
         elif req_opinion == 'disliked':
             matching_dogs = models.Dog.objects.filter(
@@ -91,15 +94,14 @@ class UserDogRelationUpdate(generics.UpdateAPIView):
     def get_object(self):
         return get_object_or_404(
             self.get_queryset(),
-            relation__user=self.request.user.pk,
+            Q(relation__user=self.request.user.pk) | Q(relation__user__isnull=True),
             id=self.kwargs.get('dog_pk')
         )
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        # instance__relation__status=
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
+        instance.relation.status = self.kwargs.get('opinion_r')
+        # serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        # serializer.is_valid(raise_exception=True)
+        # self.perform_update(serializer)
+        return super(UserDogRelationUpdate, self).update(request, *args, **kwargs)
