@@ -6,8 +6,6 @@ from django.db.models import Q
 
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework import mixins
-from rest_framework import viewsets
 
 from . import serializers
 from . import models
@@ -21,6 +19,7 @@ class UserRegisterView(CreateAPIView):
 
 class RetrieveDog(generics.RetrieveAPIView):
     serializer_class = serializers.DogSerializer
+    queryset = models.Dog.objects.all()
 
     def get_queryset(self):
         """Getting all the dogs that match the user's preference"""
@@ -40,22 +39,22 @@ class RetrieveDog(generics.RetrieveAPIView):
                 Q(age__in=list(range(span * 2, span * 3 + 1)) if 'a' in age_pref else [0]) |
                 Q(age__gte=90 if 's' in age_pref else 9999),  # 9999 impossible age for a dog
                 gender__in=gender_pref,
-                size__in=size_pref,
+                size__in=size_pref
             ).exclude(
-                # making sure they have no user or the relations is diff than 'u' undecided
-                Q(users=user) |
-                Q(relation__status='l', relation__user=user.id) |
-                Q(relation__status='d', relation__user=user.id)
+                Q(user_dog__status='l') |
+                Q(user_dog__status='d')
             ).order_by('pk')
+
         elif req_opinion == 'disliked':
             matching_dogs = models.Dog.objects.filter(
-                relation__status='d',
-                relation__user=user.id
+                user_dog__user=user.pk,
+                user_dog__status='d'
             ).order_by('pk')
+
         elif req_opinion == 'liked':
             matching_dogs = models.Dog.objects.filter(
-                relation__status='l',
-                relation__user=user.id
+                user_dog__user=user.pk,
+                user_dog__status='l'
             ).order_by('pk')
 
         return matching_dogs
@@ -63,17 +62,11 @@ class RetrieveDog(generics.RetrieveAPIView):
     def get_object(self):
         """Getting dog from query_set ordered by pk"""
         pk = self.kwargs['pk']
-
         current_dog = self.get_queryset().filter(id__gt=pk).first()
         if current_dog:
             return current_dog
         else:
             return self.get_queryset().first()
-
-    @staticmethod
-    def month_ranges(letters_for_age_ranges):
-        print(letters_for_age_ranges)
-        return letters_for_age_ranges
 
 
 class PreferenceRetrieveUpdate(generics.RetrieveUpdateAPIView):
@@ -88,20 +81,28 @@ class PreferenceRetrieveUpdate(generics.RetrieveUpdateAPIView):
 
 
 class UserDogRelationUpdate(generics.UpdateAPIView):
-    serializer_class = serializers.DogSerializer
-    queryset = models.Dog.objects.all()
+    serializer_class = serializers.UserDogSerializer
+    queryset = models.UserDog.objects.all()
 
     def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(),
-            Q(relation__user=self.request.user.pk) | Q(relation__user__isnull=True),
-            id=self.kwargs.get('dog_pk')
+        obj, created = models.UserDog.objects.update_or_create(
+            dog=self.kwargs.get('pk'),
+            user=self.request.user.pk,
         )
+        return obj
 
     def update(self, request, *args, **kwargs):
+        opinion = self.kwargs.get('opinion')
+        if opinion == 'disliked':
+            op = 'd'
+        elif opinion == 'liked':
+            op = 'l'
+        else:
+            op = 'u'
+
+        partial = kwargs.pop('partial', True)
         instance = self.get_object()
-        instance.relation.status = self.kwargs.get('opinion_r')
-        # serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        # serializer.is_valid(raise_exception=True)
-        # self.perform_update(serializer)
-        return super(UserDogRelationUpdate, self).update(request, *args, **kwargs)
+        serializer = self.get_serializer(instance, data={'status': op}, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)

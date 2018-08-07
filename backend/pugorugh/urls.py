@@ -3,6 +3,7 @@ from django.conf.urls import url
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
+from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.authtoken.views import obtain_auth_token
 
 # API endpoints
@@ -22,7 +23,7 @@ urlpatterns = ([
         views.RetrieveDog.as_view(),
         name='next'),
 
-    url(r'^api/dog/(?P<dog_pk>-?\d+)/(?P<opinion_r>liked|disliked|undecided)/$',
+    url(r'^api/dog/(?P<pk>-?\d+)/(?P<opinion>liked|disliked|undecided)/$',
         views.UserDogRelationUpdate.as_view(),
         name='relation'),
 
