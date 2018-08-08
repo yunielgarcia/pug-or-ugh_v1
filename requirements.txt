@@ -1,6 +1,8 @@
 certifi==2018.4.16
 Django==1.11
+django-filter==2.0.0
 djangorestframework==3.4.1
+Markdown==2.6.11
 pipenv==11.10.0
 pytz==2018.5
 virtualenv==15.2.0

@@ -39,21 +39,20 @@ class RetrieveDog(generics.RetrieveAPIView):
                 Q(age__in=list(range(span * 2, span * 3 + 1)) if 'a' in age_pref else [0]) |
                 Q(age__gte=90 if 's' in age_pref else 9999),  # 9999 impossible age for a dog
                 gender__in=gender_pref,
-                size__in=size_pref
-            ).exclude(
-                Q(user_dog__status='l') |
-                Q(user_dog__status='d')
+                size__in=size_pref,
+                user_dog__status='u',
+                user_dog__user=user
             ).order_by('pk')
 
         elif req_opinion == 'disliked':
             matching_dogs = models.Dog.objects.filter(
-                user_dog__user=user.pk,
+                user_dog__user=user,
                 user_dog__status='d'
             ).order_by('pk')
 
         elif req_opinion == 'liked':
             matching_dogs = models.Dog.objects.filter(
-                user_dog__user=user.pk,
+                user_dog__user=user,
                 user_dog__status='l'
             ).order_by('pk')
 
